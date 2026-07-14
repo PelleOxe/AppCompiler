@@ -1,0 +1,18 @@
+{
+  "short_name": "AppCompiler",
+  "name": "AppCompiler",
+  "description": "Verktyg för att kompilera AI Studio ZIP-exporter till kompletta PWA-applikationer redo för GitHub Pages.",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "display": "standalone",
+  "orientation": "any"
+}

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="sv" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AppCompiler</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="./favicon.svg" />
+  
+    <!-- PWA Kapabiliteter -->
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="theme-color" content="#1e293b" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="./favicon.svg" />
+    
+    <!-- Native Import Map för högpresterande ESM i webbläsaren -->
+    <script type="importmap">
+    {
+      "imports": {
+  "react": "https://esm.sh/react@19.0.0",
+  "react-dom": "https://esm.sh/react-dom@19.0.0",
+  "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+  "lucide-react": "https://esm.sh/lucide-react@0.546.0",
+  "motion": "https://esm.sh/motion@12.23.24",
+  "motion/react": "https://esm.sh/motion@12.23.24",
+  "@google/genai": "https://esm.sh/@google/genai@2.4.0",
+  "@tailwindcss/vite": "https://esm.sh/@tailwindcss/vite@4.1.14",
+  "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@5.0.4",
+  "dotenv": "https://esm.sh/dotenv@17.2.3",
+  "express": "https://esm.sh/express@4.21.2",
+  "jszip": "https://esm.sh/jszip@3.10.1",
+  "qrcode": "https://esm.sh/qrcode@1.5.4",
+  "vite": "https://esm.sh/vite@6.2.3"
+}
+    }
+    </script>
+    
+    <!-- Tailwind CSS Play CDN för direkt rendering -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Anpassade CSS-stilar från index.css -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-elegant-bg: #0B0E14;
+  --color-elegant-header: #11141B;
+  --color-elegant-border: #1A1F26;
+  --color-elegant-input: #050608;
+  --color-elegant-input-border: #232933;
+}
+
+/* Force minimum font size of 11px on all elements */
+html, body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+}
+
+* {
+  min-size: 11px;
+}
+
+/* Glass styling for Elegant Dark theme */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dark .glass {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Custom button press bounce effect */
+.btn-press {
+  transition: transform 80ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 80ms ease, filter 80ms ease;
+}
+
+.btn-press:active {
+  transform: translateY(2px) scale(0.97) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+
+
+    </style>
+    </head>
+  <body class="h-full bg-slate-50 text-slate-900 transition-colors duration-200">
+    <div id="root" class="h-full"></div>
+    <script type="module" src="./src/main.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker registrerad!', reg))
+            .catch(err => console.log('Service Worker misslyckades:', err));
+        });
+      }
+    </script>
+  
+    <!-- Registrera Service Worker för PWA-installationsstöd och offline-läge -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker registrerad för appen!', reg))
+            .catch(err => console.log('Service Worker misslyckades:', err));
+        });
+      }
+    </script>
+    </body>
+</html>
+
