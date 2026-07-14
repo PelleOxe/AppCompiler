@@ -39,18 +39,19 @@
   "jszip": "https://esm.sh/jszip@3.10.1",
   "qrcode": "https://esm.sh/qrcode@1.5.4",
   "vite": "https://esm.sh/vite@6.2.3",
-  "path": "https://esm.sh/path"
+  "path": "https://esm.sh/path",
+  "tailwindcss": "https://esm.sh/tailwindcss"
 }
     }
     </script>
     
-    <!-- Tailwind CSS Play CDN för direkt rendering -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS v4 Play CDN för direkt rendering -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     
     <!-- Anpassade CSS-stilar från index.css -->
-    <style>
+    <style type="text/tailwindcss">
       @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
+@import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
 

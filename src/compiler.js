@@ -273,9 +273,9 @@ export async function compileZip(zipFile, onProgress) {
     } else if (path.endsWith('index.css')) {
       // CSS is packed directly into index.html or copied
       const cssContent = await file.async('string');
-      // Strip tailwind import statements which are redundant with the CDN loaded styles
-      const cleanedCss = cssContent.replace(/@import\s+["']tailwindcss["']\s*;?/g, '').replace(/@tailwind\s+[^;]+;?/g, '');
-      indexCssContent = cleanedCss;
+      // For Tailwind v4 Play CDN (unpkg @tailwindcss/browser), we MUST keep the @import "tailwindcss"
+      // directive so it knows to inject Tailwind v4 utilities. We keep the file content intact.
+      indexCssContent = cssContent;
     } else {
       // Copy asset files (images, json, svgs, etc) completely untouched and prefix-stripped
       const assetData = await file.async('blob');
@@ -297,15 +297,15 @@ export async function compileZip(zipFile, onProgress) {
     </script>
     `;
 
-    // 2. Tailwind CSS CDN + Anpassade CSS-stilar
+    // 2. Tailwind CSS v4 Play CDN + Anpassade CSS-stilar
     let cssInjection = `
-    <!-- Tailwind CSS Play CDN för direkt rendering -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS v4 Play CDN för direkt rendering -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     `;
     if (indexCssContent.trim()) {
       cssInjection += `
     <!-- Anpassade CSS-stilar från index.css -->
-    <style>
+    <style type="text/tailwindcss">
       ${indexCssContent}
     </style>
     `;
@@ -372,7 +372,7 @@ export async function compileZip(zipFile, onProgress) {
     <link rel="manifest" href="./manifest.json" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="theme-color" content="#1e293b" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script type="importmap">
     {
       "imports": ${JSON.stringify(importMapImports, null, 2)}
