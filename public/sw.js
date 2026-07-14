@@ -1,4 +1,4 @@
-const CACHE_NAME = 'appcompiler-v1';
+const CACHE_NAME = 'appcompiler-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -30,19 +30,17 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Network-First with Cache Fallback strategy
+// This guarantees that online users get the latest version instantly
 self.addEventListener('fetch', (event) => {
-  // Only cache GET requests and ignore chrome-extension / external schemes
   if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
     return;
   }
   
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
+    fetch(event.request)
+      .then((response) => {
+        if (!response || response.status !== 200) {
           return response;
         }
         const responseToCache = response.clone();
@@ -50,9 +48,9 @@ self.addEventListener('fetch', (event) => {
           cache.put(event.request, responseToCache);
         });
         return response;
-      }).catch(() => {
-        // Offline fallback can go here if needed
-      });
-    })
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });

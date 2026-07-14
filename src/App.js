@@ -17,7 +17,7 @@ export default function App() {
 
   // App version state: Starts at 0.01.00
   // Increments +0.0.01 for any user compile or change, or we can hardcode 0.01.00 for the baseline
-  const appVersion = "0.01.01";
+  const appVersion = "0.01.02";
 
   // Handle dark mode effect on <html> tag
   useEffect(() => {

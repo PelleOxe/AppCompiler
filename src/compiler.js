@@ -84,15 +84,34 @@ export async function compileZip(zipFile, onProgress) {
   onProgress('Förbereder Babel-kompilatorn...');
   const Babel = await loadBabelStandalone();
 
-  // Look for configuration files in ZIP
+  // Detect common prefix (e.g. folder wrapper from Mac/Windows compression or GitHub)
+  const paths = Object.keys(inZip.files).filter(p => !inZip.files[p].dir);
+  let commonPrefix = '';
+  if (paths.length > 0) {
+    const firstPath = paths[0];
+    const firstSlashIdx = firstPath.indexOf('/');
+    if (firstSlashIdx !== -1) {
+      const potentialPrefix = firstPath.slice(0, firstSlashIdx + 1);
+      const allSharePrefix = paths.every(p => p.startsWith(potentialPrefix));
+      if (allSharePrefix) {
+        commonPrefix = potentialPrefix;
+        warnings.push(`Identifierade en omslutande mapp "${commonPrefix.slice(0, -1)}" i ZIP-filen. Mappen har tagits bort för att göra den produktionsklara strukturen ren.`);
+      }
+    }
+  }
+
+  // Look for configuration files in ZIP and auto-scan imports
   let packageJsonContent = '';
   let metadataJsonContent = '';
   let indexHtmlContent = '';
   let indexCssContent = '';
+  const scannedPackages = new Set();
   const fileKeys = Object.keys(inZip.files);
-  for (const path of fileKeys) {
-    const file = inZip.files[path];
+  const cleanedFileKeys = fileKeys.map(rawPath => commonPrefix && rawPath.startsWith(commonPrefix) ? rawPath.slice(commonPrefix.length) : rawPath);
+  for (const rawPath of fileKeys) {
+    const file = inZip.files[rawPath];
     if (file.dir) continue;
+    const path = commonPrefix && rawPath.startsWith(commonPrefix) ? rawPath.slice(commonPrefix.length) : rawPath;
     if (path.endsWith('package.json')) {
       packageJsonContent = await file.async('string');
     } else if (path.endsWith('metadata.json')) {
@@ -101,6 +120,36 @@ export async function compileZip(zipFile, onProgress) {
       indexHtmlContent = await file.async('string');
     } else if (path.endsWith('src/index.css') || path.endsWith('index.css')) {
       indexCssContent = await file.async('string');
+    }
+
+    // Scan TSX/TS/JSX/JS files for imports to ensure we include them in the Import Map
+    if (path.endsWith('.tsx') || path.endsWith('.ts') || path.endsWith('.jsx') || path.endsWith('.js')) {
+      try {
+        const code = await file.async('string');
+        let match;
+        const importRegex = /(?:import|export)\s+(?:[\s\S]*?\s+from\s+)?['"]([^'"]+)['"]/g;
+        while ((match = importRegex.exec(code)) !== null) {
+          const source = match[1];
+          if (!source.startsWith('.') && !source.startsWith('/') && !source.startsWith('@/') && !source.startsWith('http://') && !source.startsWith('https://')) {
+            // Extrahera baspaketnamnet (t.ex. lodash/debounce -> lodash, @radix-ui/react-slot -> @radix-ui/react-slot)
+            let pkgName = source;
+            if (pkgName.startsWith('@')) {
+              const parts = pkgName.split('/');
+              if (parts.length >= 2) {
+                pkgName = `${parts[0]}/${parts[1]}`;
+              }
+            } else {
+              const parts = pkgName.split('/');
+              pkgName = parts[0];
+            }
+            if (pkgName && pkgName !== 'react' && pkgName !== 'react-dom') {
+              scannedPackages.add(pkgName);
+            }
+          }
+        }
+      } catch (e) {
+        // Ignored
+      }
     }
   }
 
@@ -139,6 +188,13 @@ export async function compileZip(zipFile, onProgress) {
     }
   }
 
+  // Merge auto-scanned packages that might be missing from package.json
+  scannedPackages.forEach(pkg => {
+    if (!dependencies[pkg]) {
+      dependencies[pkg] = 'latest';
+    }
+  });
+
   // Capitalize name for presentation
   const formattedAppName = appName.split(/[-_ ]+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'Min PWA App';
 
@@ -162,15 +218,18 @@ export async function compileZip(zipFile, onProgress) {
       importMapImports['motion'] = 'https://esm.sh/motion@12.23.24';
       importMapImports['motion/react'] = 'https://esm.sh/motion@12.23.24';
     } else {
-      importMapImports[dep] = `https://esm.sh/${dep}${cleanVersion ? '@' + cleanVersion : ''}`;
+      importMapImports[dep] = `https://esm.sh/${dep}${cleanVersion && cleanVersion !== 'latest' ? '@' + cleanVersion : ''}`;
     }
   });
 
   // Compile individual files
   let compiledCount = 0;
-  for (const path of fileKeys) {
-    const file = inZip.files[path];
+  for (const rawPath of fileKeys) {
+    const file = inZip.files[rawPath];
     if (file.dir) continue;
+
+    // Strip prefix if exists to keep output zip clean and flat at root level
+    const path = commonPrefix && rawPath.startsWith(commonPrefix) ? rawPath.slice(commonPrefix.length) : rawPath;
 
     // Ignore build configurations and development files that are not needed on GitHub Pages
     if (path === 'package.json' || path === 'tsconfig.json' || path === 'vite.config.ts' || path === '.env.example' || path === '.gitignore' || path === 'metadata.json' || path.startsWith('.git/') || path.startsWith('node_modules/') || path.includes('.aistudio')) {
@@ -194,8 +253,8 @@ export async function compileZip(zipFile, onProgress) {
           filename: path
         });
         compiledCode = transpileResult.code || '';
-        // Apply our custom import rewriter
-        compiledCode = rewriteImports(compiledCode, path, fileKeys);
+        // Apply our custom import rewriter with the cleaned keys list
+        compiledCode = rewriteImports(compiledCode, path, cleanedFileKeys);
       } catch (err) {
         warnings.push(`Fel vid kompilering av ${path}: ${err.message || err}`);
         // Fallback to original code if compilation fails
@@ -216,7 +275,7 @@ export async function compileZip(zipFile, onProgress) {
       const cleanedCss = cssContent.replace(/@import\s+["']tailwindcss["']\s*;?/g, '').replace(/@tailwind\s+[^;]+;?/g, '');
       indexCssContent = cleanedCss;
     } else {
-      // Copy asset files (images, json, svgs, etc) completely untouched
+      // Copy asset files (images, json, svgs, etc) completely untouched and prefix-stripped
       const assetData = await file.async('blob');
       outZip.file(path, assetData);
     }
@@ -279,9 +338,12 @@ export async function compileZip(zipFile, onProgress) {
     // Replace the title with the parsed application name
     finalHtml = finalHtml.replace(/<title>.*?<\/title>/i, `<title>${formattedAppName}</title>`);
 
-    // Rewrite main.tsx module loading path to compiled main.js and make it relative for subfolder hosting like GitHub Pages!
-    finalHtml = finalHtml.replace(/<script\s+type="module"\s+src="\/src\/main\.tsx"\s*><\/script>/i, '<script type="module" src="./src/main.js"></script>');
-    finalHtml = finalHtml.replace(/<script\s+type="module"\s+src="src\/main\.tsx"\s*><\/script>/i, '<script type="module" src="./src/main.js"></script>');
+    // Extremely robust replacement of any script tag containing main.tsx to load compiled main.js relatively
+    finalHtml = finalHtml.replace(/<script\s+[^>]*src=["'](?:.*?)\/src\/main\.tsx["'][^>]*>(?:\s*<\/script>)?/gi, '<script type="module" src="./src/main.js"></script>');
+
+    // Also replace absolute links for favicon and manifest to make them relative for subfolders like /repository-name/
+    finalHtml = finalHtml.replace(/href=["']\/favicon\.svg["']/g, 'href="./favicon.svg"');
+    finalHtml = finalHtml.replace(/href=["']\/manifest\.json["']/g, 'href="./manifest.json"');
 
     // Inject Import Map, Tailwind and PWA Meta in <head>
     if (finalHtml.includes('</head>')) {
@@ -352,7 +414,8 @@ export async function compileZip(zipFile, onProgress) {
 
   // Generate sw.js for output ZIP
   onProgress('Skapar sw.js...');
-  const appSw = `const CACHE_NAME = '${appName.toLowerCase().replace(/[^a-z0-9]/g, '')}-cache-v1';
+  const uniqueCacheSuffix = Math.random().toString(36).substring(2, 8);
+  const appSw = `const CACHE_NAME = '${appName.toLowerCase().replace(/[^a-z0-9]/g, '')}-${uniqueCacheSuffix}-cache';
 const ASSETS = [
   './',
   './index.html',
@@ -378,17 +441,23 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+// Network-First with Cache Fallback strategy
+// This guarantees that any online developer sees their new commits and code updates instantly,
+// while still preserving offline capability and falling back to cache when disconnected.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || !e.request.url.startsWith(self.location.origin)) return;
+  
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      return cached || fetch(e.request).then(res => {
+    fetch(e.request)
+      .then(res => {
         if (!res || res.status !== 200) return res;
         const clone = res.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         return res;
-      }).catch(() => {});
-    })
+      })
+      .catch(() => {
+        return caches.match(e.request);
+      })
   );
 });`;
   outZip.file('sw.js', appSw);
