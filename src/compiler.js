@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 // Helper to rewrite imports in transpiled JS files
-export function rewriteImports(code, fileKeys) {
+export function rewriteImports(code, currentPath, fileKeys) {
   // Replace relative or absolute workspace imports
   // E.g., import App from './App.js' -> import App from './App.js'
   // E.g., import { Button } from './components/Button.js' -> import { Button } from './components/Button.js'
@@ -15,16 +15,25 @@ export function rewriteImports(code, fileKeys) {
     if (source.startsWith('.') || source.startsWith('/') || source.startsWith('@/')) {
       let cleanSource = source;
 
-      // Resolve alias '@/src/...' to './...' or correct paths relative to src
+      // Resolve alias '@/src/...' or '@/...' to relative path based on the current file's depth
       if (cleanSource.startsWith('@/')) {
-        // If starting with '@/src/', make relative
-        cleanSource = cleanSource.replace(/^@\/src\//, './');
-        cleanSource = cleanSource.replace(/^@\//, './');
+        const segments = currentPath.split('/');
+        const depth = segments.length - 2; // e.g., src/main.tsx (length 2) -> depth 0, src/components/ZipUploader.tsx (length 3) -> depth 1
+        const relativePrefix = depth > 0 ? '../'.repeat(depth) : './';
+        if (cleanSource.startsWith('@/src/')) {
+          cleanSource = cleanSource.replace(/^@\/src\//, relativePrefix);
+        } else {
+          cleanSource = cleanSource.replace(/^@\//, relativePrefix);
+        }
       }
 
-      // If absolute workspace path like '/src/main.tsx', make relative to root
+      // If absolute workspace path like '/src/main.tsx', make relative to project root
+      // (This prevents absolute URLs from breaking when deployed under a GitHub Pages subfolder like username.github.io/repo/)
       if (cleanSource.startsWith('/src/')) {
-        cleanSource = '.' + cleanSource;
+        const segments = currentPath.split('/');
+        const depth = segments.length - 1; // e.g., src/main.tsx (length 2) -> depth 1, src/components/ZipUploader.tsx (length 3) -> depth 2
+        const relativeToRootPrefix = depth > 0 ? '../'.repeat(depth) : './';
+        cleanSource = cleanSource.replace(/^\/src\//, relativeToRootPrefix + 'src/');
       }
       if (cleanSource.endsWith('.tsx')) {
         cleanSource = cleanSource.slice(0, -4) + '.js';
@@ -138,7 +147,9 @@ export async function compileZip(zipFile, onProgress) {
   const importMapImports = {
     'react': 'https://esm.sh/react@19.0.0',
     'react-dom': 'https://esm.sh/react-dom@19.0.0',
-    'react-dom/client': 'https://esm.sh/react-dom@19.0.0/client'
+    'react-dom/client': 'https://esm.sh/react-dom@19.0.0/client',
+    'react/jsx-runtime': 'https://esm.sh/react@19.0.0/jsx-runtime',
+    'react/jsx-dev-runtime': 'https://esm.sh/react@19.0.0/jsx-runtime'
   };
 
   // Add all other found dependencies to import map
@@ -184,7 +195,7 @@ export async function compileZip(zipFile, onProgress) {
         });
         compiledCode = transpileResult.code || '';
         // Apply our custom import rewriter
-        compiledCode = rewriteImports(compiledCode, fileKeys);
+        compiledCode = rewriteImports(compiledCode, path, fileKeys);
       } catch (err) {
         warnings.push(`Fel vid kompilering av ${path}: ${err.message || err}`);
         // Fallback to original code if compilation fails
