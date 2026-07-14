@@ -1,4 +1,4 @@
-const CACHE_NAME = 'appcompiler-uy8bzf-cache';
+const CACHE_NAME = 'appcompiler-xknbcm-cache';
 const ASSETS = [
   './',
   './index.html',

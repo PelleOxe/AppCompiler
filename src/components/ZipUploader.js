@@ -75,7 +75,7 @@ export default function ZipUploader({
       onDragLeave: handleDrag,
       onDrop: handleDrop,
       onClick: onButtonClick,
-      className: `w-full py-10 px-6 rounded-3.5xl border-2 border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 group ${isDragActive ? 'border-indigo-500 bg-indigo-500/5 dark:bg-indigo-500/10 scale-[0.99]' : 'border-slate-200 dark:border-slate-850 bg-white dark:bg-[#0B0E14]/30 dark:glass hover:border-indigo-400 dark:hover:border-indigo-500/70 hover:bg-slate-50 dark:hover:bg-white/[0.05]'}`,
+      className: `w-full py-10 px-6 rounded-3.5xl border-2 border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 group ${isDragActive ? 'border-indigo-500 bg-indigo-500/5 dark:bg-indigo-500/10 scale-[0.99]' : 'border-slate-200 dark:border-elegant-border bg-white dark:bg-elegant-header hover:border-indigo-400 dark:hover:border-indigo-500/70 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`,
       children: [/*#__PURE__*/_jsx("div", {
         className: "p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 mb-4 group-hover:scale-110 transition-transform duration-200 shadow-sm",
         children: /*#__PURE__*/_jsx(Upload, {
@@ -92,7 +92,7 @@ export default function ZipUploader({
         children: "Bara ZIP-format st\xF6ds"
       })]
     }) : /*#__PURE__*/_jsxs("div", {
-      className: "w-full p-5 bg-white dark:bg-white/[0.03] dark:glass border border-slate-200 dark:border-white/10 rounded-3xl flex items-center justify-between shadow-sm",
+      className: "w-full p-5 bg-white dark:bg-elegant-header border border-slate-200 dark:border-elegant-border rounded-3xl flex items-center justify-between shadow-sm",
       children: [/*#__PURE__*/_jsxs("div", {
         className: "flex items-center gap-3.5 min-w-0",
         children: [/*#__PURE__*/_jsx("div", {

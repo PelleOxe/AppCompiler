@@ -1,4 +1,6 @@
 import JSZip from 'jszip';
+import { APP_COMPILER_VERSION } from './version.js';
+
 // Helper to rewrite imports in transpiled JS files
 export function rewriteImports(code, currentPath, fileKeys) {
   // Replace relative or absolute workspace imports
@@ -486,7 +488,7 @@ self.addEventListener('fetch', e => {
   return {
     outputZip,
     result: {
-      fileName: zipFile.name.replace('.zip', '') + '_compiled.zip',
+      fileName: `${APP_COMPILER_VERSION}_${formattedAppName.replace(/\s+/g, '')}.zip`,
       fileCount: Object.keys(outZip.files).length,
       success: true,
       warnings,

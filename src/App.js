@@ -4,6 +4,7 @@ import ZipUploader from './components/ZipUploader.js';
 import ThemeToggle from './components/ThemeToggle.js';
 import ShareModal from './components/ShareModal.js';
 import { compileZip } from './compiler.js';
+import { APP_COMPILER_VERSION } from './version.js';
 import { jsx as _jsx } from "react/jsx-runtime";
 import { jsxs as _jsxs } from "react/jsx-runtime";
 export default function App() {
@@ -15,9 +16,8 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [isShareOpen, setIsShareOpen] = useState(false);
 
-  // App version state: Starts at 0.01.00
-  // Increments +0.0.01 for any user compile or change, or we can hardcode 0.01.00 for the baseline
-  const appVersion = "0.01.02";
+  // App version state: Starts at 1.0.01 and increments
+  const appVersion = APP_COMPILER_VERSION;
 
   // Handle dark mode effect on <html> tag
   useEffect(() => {
@@ -109,7 +109,7 @@ export default function App() {
         children: [/*#__PURE__*/_jsxs("button", {
           id: "share-btn",
           onClick: () => setIsShareOpen(true),
-          className: "btn-press p-2.5 rounded-xl bg-white dark:glass text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 shadow-sm hover:bg-slate-50 dark:hover:bg-white/10 cursor-pointer flex items-center justify-center gap-1.5",
+          className: "btn-press p-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-center gap-1.5",
           title: "Dela appen",
           children: [/*#__PURE__*/_jsx(Share2, {
             className: "h-5 w-5 text-indigo-400"
@@ -125,7 +125,7 @@ export default function App() {
     }), /*#__PURE__*/_jsxs("main", {
       className: "flex-1 max-w-4xl w-full mx-auto px-4 md:px-8 py-8 flex flex-col gap-6",
       children: [/*#__PURE__*/_jsxs("div", {
-        className: "bg-white dark:glass rounded-3xl p-6 shadow-sm flex flex-col md:flex-row gap-5 items-start md:items-center relative overflow-hidden",
+        className: "bg-white dark:bg-elegant-header border border-slate-200/60 dark:border-elegant-border rounded-3xl p-6 shadow-sm flex flex-col md:flex-row gap-5 items-start md:items-center relative overflow-hidden",
         children: [/*#__PURE__*/_jsx("div", {
           className: "absolute top-0 right-0 h-40 w-40 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full blur-3xl pointer-events-none"
         }), /*#__PURE__*/_jsx("div", {
@@ -161,7 +161,7 @@ export default function App() {
             }), "Kompilera till Produktionsklar PWA"]
           })]
         }), isCompiling && /*#__PURE__*/_jsxs("div", {
-          className: "bg-white dark:glass rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-md animate-pulse",
+          className: "bg-white dark:bg-elegant-header border border-slate-200/60 dark:border-elegant-border rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-md animate-pulse",
           children: [/*#__PURE__*/_jsxs("div", {
             className: "relative mb-5",
             children: [/*#__PURE__*/_jsx("div", {
@@ -179,7 +179,7 @@ export default function App() {
         }), compilationResult && /*#__PURE__*/_jsxs("div", {
           className: "space-y-5 animate-fade-in",
           children: [/*#__PURE__*/_jsxs("div", {
-            className: "bg-white dark:glass rounded-3xl p-6 shadow-sm",
+            className: "bg-white dark:bg-elegant-header border border-slate-200/60 dark:border-elegant-border rounded-3xl p-6 shadow-sm",
             children: [/*#__PURE__*/_jsxs("div", {
               className: "flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/60 pb-5 mb-5",
               children: [/*#__PURE__*/_jsxs("div", {
@@ -264,14 +264,14 @@ export default function App() {
               }), /*#__PURE__*/_jsxs("div", {
                 className: "bg-slate-50 dark:bg-[#050608]/40 rounded-2.5xl border border-slate-100 dark:border-[#232933]/50 p-5 space-y-3.5",
                 children: [/*#__PURE__*/_jsxs("h4", {
-                  className: "text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5",
+                  className: "text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5",
                   children: [/*#__PURE__*/_jsx(CheckCircle, {
                     className: "h-4 w-4 text-emerald-500"
                   }), "Injekterat & Optimerat f\xF6r GitHub Pages:"]
                 }), /*#__PURE__*/_jsxs("ul", {
                   className: "grid grid-cols-1 sm:grid-cols-2 gap-3 pl-1",
                   children: [/*#__PURE__*/_jsxs("li", {
-                    className: "text-xs text-slate-600 dark:text-slate-400 flex items-start gap-2 leading-relaxed",
+                    className: "text-xs text-slate-600 dark:text-slate-200 flex items-start gap-2 leading-relaxed",
                     children: [/*#__PURE__*/_jsx("span", {
                       className: "text-emerald-500 shrink-0 select-none",
                       children: "\u2713"
@@ -281,7 +281,7 @@ export default function App() {
                       }), " till Native ES Module JS (.js)."]
                     })]
                   }), /*#__PURE__*/_jsxs("li", {
-                    className: "text-xs text-slate-600 dark:text-slate-400 flex items-start gap-2 leading-relaxed",
+                    className: "text-xs text-slate-600 dark:text-slate-200 flex items-start gap-2 leading-relaxed",
                     children: [/*#__PURE__*/_jsx("span", {
                       className: "text-emerald-500 shrink-0 select-none",
                       children: "\u2713"
@@ -291,7 +291,7 @@ export default function App() {
                       }), " injicerat i index.html f\xF6r s\xF6ml\xF6s CDN-laddning."]
                     })]
                   }), /*#__PURE__*/_jsxs("li", {
-                    className: "text-xs text-slate-600 dark:text-slate-400 flex items-start gap-2 leading-relaxed",
+                    className: "text-xs text-slate-600 dark:text-slate-200 flex items-start gap-2 leading-relaxed",
                     children: [/*#__PURE__*/_jsx("span", {
                       className: "text-emerald-500 shrink-0 select-none",
                       children: "\u2713"
@@ -301,7 +301,7 @@ export default function App() {
                       }), " skapat f\xF6r hemsk\xE4rms-installation."]
                     })]
                   }), /*#__PURE__*/_jsxs("li", {
-                    className: "text-xs text-slate-600 dark:text-slate-400 flex items-start gap-2 leading-relaxed",
+                    className: "text-xs text-slate-600 dark:text-slate-200 flex items-start gap-2 leading-relaxed",
                     children: [/*#__PURE__*/_jsx("span", {
                       className: "text-emerald-500 shrink-0 select-none",
                       children: "\u2713"
@@ -311,7 +311,7 @@ export default function App() {
                       }), " aktiverad f\xF6r offline-kapabilitet."]
                     })]
                   }), /*#__PURE__*/_jsxs("li", {
-                    className: "text-xs text-slate-600 dark:text-slate-400 flex items-start gap-2 leading-relaxed",
+                    className: "text-xs text-slate-600 dark:text-slate-200 flex items-start gap-2 leading-relaxed",
                     children: [/*#__PURE__*/_jsx("span", {
                       className: "text-emerald-500 shrink-0 select-none",
                       children: "\u2713"
@@ -321,7 +321,7 @@ export default function App() {
                       }), " till\xE4mpade i index.html f\xF6r subfolders support."]
                     })]
                   }), /*#__PURE__*/_jsxs("li", {
-                    className: "text-xs text-slate-600 dark:text-slate-400 flex items-start gap-2 leading-relaxed",
+                    className: "text-xs text-slate-600 dark:text-slate-200 flex items-start gap-2 leading-relaxed",
                     children: [/*#__PURE__*/_jsx("span", {
                       className: "text-emerald-500 shrink-0 select-none",
                       children: "\u2713"
@@ -422,9 +422,9 @@ export default function App() {
           })]
         })]
       }), /*#__PURE__*/_jsxs("div", {
-        className: "bg-white dark:glass rounded-3xl p-5 space-y-3.5 shadow-sm",
+        className: "bg-white dark:bg-elegant-header border border-slate-200/60 dark:border-elegant-border rounded-3xl p-5 space-y-3.5 shadow-sm",
         children: [/*#__PURE__*/_jsxs("div", {
-          className: "flex items-center gap-2 text-slate-700 dark:text-slate-300",
+          className: "flex items-center gap-2 text-slate-700 dark:text-slate-200 font-semibold",
           children: [/*#__PURE__*/_jsx(Info, {
             className: "h-4.5 w-4.5 text-indigo-500"
           }), /*#__PURE__*/_jsx("h4", {
@@ -432,7 +432,7 @@ export default function App() {
             children: "Hur AppCompiler Fungerar"
           })]
         }), /*#__PURE__*/_jsx("p", {
-          className: "text-xs text-slate-500 dark:text-slate-400 leading-relaxed",
+          className: "text-xs text-slate-500 dark:text-slate-300 leading-relaxed",
           children: "I AI Studio bygger du moderna React/Vite-applikationer med TypeScript (.tsx) och Tailwind v4. Traditionellt kr\xE4ver dessa ett Node.js-bygge p\xE5 en server f\xF6r att kunna k\xF6ras. AppCompiler k\xF6r en hel kompileringsmilj\xF6 direkt i din webbl\xE4sare, analyserar dina k\xE4llfiler, och omvandlar dem till ren HTML5, JavaScript (ES6 Modules) och CSS som kan tolkas direkt av webbl\xE4saren utan behov av n\xE5gra byggsteg eller servrar."
         })]
       })]
